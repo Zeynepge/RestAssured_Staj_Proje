@@ -17,24 +17,24 @@ import static org.hamcrest.Matchers.equalTo;
 
 public class PositionCategories_Hatice {
 
-    Faker faker3=new Faker();
+    Faker faker3 = new Faker();
     RequestSpecification reqSpec;
 
-    String  positionCategoryName;
+    String positionCategoryName;
     String positionCategoriesId;
 
 
     @BeforeClass
-    public void Setup(){
+    public void Setup() {
 
-        baseURI="https://test.mersys.io";
+        baseURI = "https://test.mersys.io";
 
-        Map<String,String > userCredential=new HashMap<>();
-        userCredential.put("username","turkeyts");
-        userCredential.put("password","TechnoStudy123");
-        userCredential.put("rememberMe","true");
+        Map<String, String> userCredential = new HashMap<>();
+        userCredential.put("username", "turkeyts");
+        userCredential.put("password", "TechnoStudy123");
+        userCredential.put("rememberMe", "true");
 
-        Cookies cookies=
+        Cookies cookies =
                 given()
                         .contentType(ContentType.JSON)
                         .body(userCredential)
@@ -45,26 +45,46 @@ public class PositionCategories_Hatice {
                         .then()
                         //.log().all()
                         .statusCode(200)
-                        .extract().response().getDetailedCookies()
+                        .extract().response().getDetailedCookies();
 
-                ;
-
-        reqSpec=new RequestSpecBuilder()
+        reqSpec = new RequestSpecBuilder()
                 .setContentType(ContentType.JSON)
                 .addCookies(cookies)
                 .build();
     }
+
     @Test
-    public void createPositionCategories(){
+    public void createPositionCategories() {
 
-        Map<String, String> positionCategory=new HashMap<>();
+        Map<String, String> positionCategory = new HashMap<>();
 
-        positionCategoryName=faker3.address().firstName();
+        positionCategoryName = faker3.address().firstName();
 
-        positionCategory.put("name",positionCategoryName);
+        positionCategory.put("name", positionCategoryName);
 
 
-        positionCategoriesId=
+        positionCategoriesId =
+                given()
+                        .spec(reqSpec)
+                        .body(positionCategory)
+                        .log().body()
+
+                        .when()
+                        .post("/school-service/api/position-category")
+
+                        .then()
+                        .log().body()
+                        .statusCode(201)
+                        .extract().path("id")
+        ;
+    }
+
+    @Test(dependsOnMethods = "createPositionCategories")
+    public void createPositionCategoriesNegative() {
+
+        Map<String, String> positionCategory = new HashMap<>();
+        positionCategory.put("name", positionCategoryName);
+
         given()
                 .spec(reqSpec)
                 .body(positionCategory)
@@ -75,27 +95,7 @@ public class PositionCategories_Hatice {
 
                 .then()
                 .log().body()
-                .statusCode(201)
-                .extract().path("id")
-        ;
-    }
-    @Test(dependsOnMethods = "createPositionCategories")
-    public void createPositionCategoriesNegative(){
-
-        Map<String, String> positionCategory=new HashMap<>();
-        positionCategory.put("name",positionCategoryName);
-
-               given()
-                        .spec(reqSpec)
-                        .body(positionCategory)
-                        .log().body()
-
-                        .when()
-                        .post("/school-service/api/position-category")
-
-                        .then()
-                        .log().body()
-                        .statusCode(400)
+                .statusCode(400)
 
         ;
     }
@@ -109,7 +109,7 @@ public class PositionCategories_Hatice {
         positionCategoryName = faker3.address().firstName();
 
         positionCategory.put("name", positionCategoryName);
-        positionCategory.put("id",positionCategoriesId);
+        positionCategory.put("id", positionCategoriesId);
 
         given()
                 .spec(reqSpec)
@@ -124,23 +124,25 @@ public class PositionCategories_Hatice {
                 .statusCode(200)
                 .contentType(ContentType.JSON)
                 .body("name", equalTo(positionCategoryName))
-                .body("id",equalTo(positionCategoriesId))
+                .body("id", equalTo(positionCategoriesId))
         ;
     }
+
     @Test(dependsOnMethods = "updatePositionCategories")
-    public void deletePositionCategories(){
+    public void deletePositionCategories() {
         given()
                 .spec(reqSpec)
 
                 .when()
 
-                .delete("/school-service/api/position-category/" +positionCategoriesId)
+                .delete("/school-service/api/position-category/" + positionCategoriesId)
 
                 .then()
                 .log().body()
                 .statusCode(204)
         ;
     }
+
     @Test(dependsOnMethods = "deletePositionCategories")
     public void deletePositionCategoriesNegative() {
         given()
@@ -155,5 +157,5 @@ public class PositionCategories_Hatice {
                 .statusCode(400)
         ;
     }
-    }
+}
 
