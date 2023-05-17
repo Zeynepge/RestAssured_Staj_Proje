@@ -5,9 +5,15 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.http.Cookies;
 import io.restassured.specification.RequestSpecification;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,14 +33,23 @@ public class Discounts_Muaz {
     String discountId;
 
     @BeforeClass
-    public void Setup() {
+    public void Setup() throws IOException {
 
         baseURI = "https://test.mersys.io";
 
-        Map<String, String> userCredential = new HashMap<>();
-        userCredential.put("username", "turkeyts");
-        userCredential.put("password", "TechnoStudy123");
-        userCredential.put("rememberMe", "true");
+        String path="src/test/java/Campus/Excel_Data/Campus_Data.xlsx";
+
+        FileInputStream inputStream=new FileInputStream(path);
+        Workbook workbook= WorkbookFactory.create(inputStream);
+        Sheet sheet=workbook.getSheetAt(0);
+
+        String userName=String.valueOf(sheet.getRow(1).getCell(0));
+        String password=String.valueOf(sheet.getRow(1).getCell(1));
+
+        Map<String,String > userCredential=new HashMap<>();
+        userCredential.put("username",userName);
+        userCredential.put("password",password);
+        userCredential.put("rememberMe","true");
 
         Cookies cookies =
                 given()
